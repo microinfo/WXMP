@@ -12,8 +12,9 @@ namespace MITech.WeiXin.MP.HttpUtility
     {
         public static T GetJson<T>(string url)
         {
+            string returnText = HttpUtility.RequestUtility.HttpGet(url);
+
             JavaScriptSerializer js = new JavaScriptSerializer();
-            string returnText = HttpUtility.RequestUtility.DownloadString(url);
 
             if (returnText.Contains("errcode"))
             {

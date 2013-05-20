@@ -15,7 +15,7 @@ namespace MITech.WeiXin.MP.Helpers
         /// <typeparam name="T">MessageBase为基类的类型，Response和Request都可以</typeparam>
         /// <param name="entity">实体</param>
         /// <param name="doc">XML</param>
-        public static void FillEntityWithXml<T>(T entity, XDocument doc) where T : /*MessageBase*/ class, new()
+        public static void FillEntityWithXml<T>(this T entity, XDocument doc) where T : /*MessageBase*/ class, new()
         {
             entity = entity ?? new T();
             var root = doc.Root;
@@ -54,13 +54,16 @@ namespace MITech.WeiXin.MP.Helpers
                             break;
                         //以下为枚举类型
                         case "RequestMsgType":
-                            prop.SetValue(entity, MsgTypeHelper.GetRequestMsgType(root.Element(propName).Value), null);
+                            //已设为只读
+                            //prop.SetValue(entity, MsgTypeHelper.GetRequestMsgType(root.Element(propName).Value), null);
                             break;
                         case "ResponseMsgType"://Response适用
-                            prop.SetValue(entity, MsgTypeHelper.GetResponseMsgType(root.Element(propName).Value), null);
+                            //已设为只读
+                            //prop.SetValue(entity, MsgTypeHelper.GetResponseMsgType(root.Element(propName).Value), null);
                             break;
                         case "Event":
-                            prop.SetValue(entity, EventHelper.GetEventType(root.Element(propName).Value), null);
+                            //已设为只读
+                            //prop.SetValue(entity, EventHelper.GetEventType(root.Element(propName).Value), null);
                             break;
                         //以下为实体类型
                         case "List`1"://List<T>类型，ResponseMessageNews适用
@@ -68,18 +71,18 @@ namespace MITech.WeiXin.MP.Helpers
                             if (genericArguments[0].Name == "Article")//Response适用
                             {
                                 //文章下属节点item
-                                List<Article> articles=new List<Article>();
+                                List<Article> articles = new List<Article>();
                                 foreach (var item in root.Element(propName).Elements("item"))
                                 {
                                     var article = new Article();
-                                    FillEntityWithXml(article,new XDocument(item));
+                                    FillEntityWithXml(article, new XDocument(item));
                                     articles.Add(article);
                                 }
-                                prop.SetValue(entity, articles,null);
+                                prop.SetValue(entity, articles, null);
                             }
                             break;
                         case "Music"://ResponseMessageMusic适用
-                            Music music=new Music();
+                            Music music = new Music();
                             FillEntityWithXml(music, new XDocument(root.Element(propName)));
                             prop.SetValue(entity, music, null);
                             break;
@@ -94,10 +97,10 @@ namespace MITech.WeiXin.MP.Helpers
         /// <summary>
         /// 将实体转为XML
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entity"></param>
+        /// <typeparam name="T">RequestMessage或ResponseMessage</typeparam>
+        /// <param name="entity">实体</param>
         /// <returns></returns>
-        public static XDocument ConvertEntityToXml<T>(T entity) where T : class , new()
+        public static XDocument ConvertEntityToXml<T>(this T entity) where T : class , new()
         {
             entity = entity ?? new T();
             var doc = new XDocument();
@@ -184,6 +187,28 @@ namespace MITech.WeiXin.MP.Helpers
                 }
             }
             return doc;
+        }
+
+        /// <summary>
+        /// 将实体转为XML字符串
+        /// </summary>
+        /// <typeparam name="T">RequestMessage或ResponseMessage</typeparam>
+        /// <param name="entity">实体</param>
+        /// <returns></returns>
+        public static string ConvertEntityToXmlString<T>(this T entity) where T : class , new()
+        {
+            return entity.ConvertEntityToXml().ToString();
+        }
+
+        /// <summary>
+        /// ResponseMessageBase.CreateFromRequestMessage<T>(requestMessage)的扩展方法
+        /// </summary>
+        /// <typeparam name="T">需要生成的ResponseMessage类型</typeparam>
+        /// <param name="requestMessage">IRequestMessageBase接口下的接收信息类型</param>
+        /// <returns></returns>
+        public static T CreateResponseMessage<T>(this IRequestMessageBase requestMessage) where T : ResponseMessageBase
+        {
+            return ResponseMessageBase.CreateFromRequestMessage<T>(requestMessage);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace MITech.WeiXin.MP.Entities
         /// <summary>
         /// 事件类型
         /// </summary>
-        Event Event { get; set; }
+        Event Event { get; }
         /// <summary>
         /// 事件KEY值，与自定义菜单接口中KEY值对应
         /// </summary>
@@ -19,10 +19,19 @@ namespace MITech.WeiXin.MP.Entities
 
     public class RequestMessageEventBase : RequestMessageBase, IRequestMessageBase
     {
+        public override RequestMsgType MsgType
+        {
+            get { return RequestMsgType.Event; }
+        }
+
         /// <summary>
         /// 事件类型
         /// </summary>
-        public Event Event { get; set; }
+        public virtual Event Event
+        {
+            get { return Event.ENTER; }
+        }
+
         /// <summary>
         /// 事件KEY值，与自定义菜单接口中KEY值对应
         /// </summary>
